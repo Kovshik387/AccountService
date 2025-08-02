@@ -3,11 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{70087F30-554F-433B-8CB7-CE6BB7D43046}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		docker-compose.yaml = docker-compose.yaml
+		GetAccessTokenTest.http = GetAccessTokenTest.http
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{43F3E1C9-FF6E-41DD-892B-26464628D294}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountService", "src\AccountService\AccountService.csproj", "{A9360249-CE8F-4446-A50D-B12C7BD17D37}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{FFB29490-7147-4708-A50D-FD0EC4CA4BE8}"
+	ProjectSection(SolutionItems) = preProject
+		config\AccountRealm-realm.json = config\AccountRealm-realm.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,5 +29,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A9360249-CE8F-4446-A50D-B12C7BD17D37} = {43F3E1C9-FF6E-41DD-892B-26464628D294}
+		{FFB29490-7147-4708-A50D-FD0EC4CA4BE8} = {70087F30-554F-433B-8CB7-CE6BB7D43046}
 	EndGlobalSection
 EndGlobal
