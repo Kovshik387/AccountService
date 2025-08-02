@@ -1,7 +1,9 @@
 ﻿using AccountService.Domain.Entities.Enums;
 
 namespace AccountService.Features.Accounts.Queries.GetAccountsByOwnerId;
-
+/// <summary>
+/// Информации о счетах
+/// </summary>
 public record GetAccountListByOwnerIdQueryResponse
 {
     public Guid Id { get; init; }
