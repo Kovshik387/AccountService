@@ -1,0 +1,38 @@
+name: bank
+
+networks:
+    dev:
+        driver: bridge
+
+services:
+    keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        container_name: keycloak
+        ports:
+            - "8010:8080"
+        environment:
+            KEYCLOAK_ADMIN: admin
+            KEYCLOAK_ADMIN_PASSWORD: superpassword123
+        command:
+             - start-dev
+             - --import-realm
+        networks:
+            - dev
+        volumes:
+            - ./config:/opt/keycloak/data/import
+
+    account-service:
+        image: ${DOCKER_REGISTRY-}account-service
+        container_name: account-service 
+        build: 
+            context: .
+            dockerfile: ./src/AccountService/Dockerfile
+        networks:
+            - dev
+        ports:
+            - "80:8080"
+        depends_on:
+        - keycloak
+
+volumes:
+    config:
