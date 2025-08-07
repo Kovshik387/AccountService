@@ -7,7 +7,8 @@ using MediatR;
 
 namespace AccountService.Features.Transactions.Commands.TransferTransaction;
 
-public class TransferTransactionCommandHandler : IRequestHandler<TransferTransactionCommand,
+public class 
+    TransferTransactionCommandHandler : IRequestHandler<TransferTransactionCommand,
     TransferTransactionResponse>
 {
     private readonly IAccountRepository _accountRepository;
