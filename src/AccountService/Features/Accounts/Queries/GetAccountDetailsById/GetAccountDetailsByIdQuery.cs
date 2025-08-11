@@ -18,4 +18,8 @@ public record GetAccountDetailsByIdQuery : IRequest<GetAccountDetailsByIdQueryRe
     /// Вторая датаЫ
     /// </summary>
     public DateTimeOffset? DateTo { get; init; }
+    /// <summary>
+    /// Concurrency токен
+    /// </summary>
+    public uint XMin { get; init; }
 }

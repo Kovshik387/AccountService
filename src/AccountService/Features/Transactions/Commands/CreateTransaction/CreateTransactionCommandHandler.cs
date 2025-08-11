@@ -2,6 +2,7 @@
 using AccountService.Domain.Entities.Enums;
 using AccountService.Domain.Repositories;
 using AccountService.Features.Exceptions;
+using AccountService.Features.Interfaces;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -12,14 +13,16 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly IPgRepository _pgRepository;
     private readonly IMapper _mapper;
 
     public CreateTransactionCommandHandler(IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository, IMapper mapper)
+        ITransactionRepository transactionRepository, IMapper mapper, IPgRepository pgRepository)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
         _mapper = mapper;
+        _pgRepository = pgRepository;
     }
 
     public async Task<CreateTransactionResponse> Handle(CreateTransactionCommand request,
@@ -42,18 +45,22 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             Currency = request.Currency,
             CounterpartyAccountId = request.CounterpartyAccountId
         };
+
+        await using var connection = await _pgRepository.OpenConnectionAsync(cancellationToken);
+        await using var transactionDb = await connection.BeginTransactionAsync(cancellationToken);
         
-        var result = await _transactionRepository.CreateTransactionAsync(transaction, cancellationToken);
+        var result = await _transactionRepository.CreateTransactionAsync(transaction, connection, transactionDb,
+            cancellationToken);
 
         var resultMoney = request.Type switch
         {
-            TransactionType.Debit => request.Amount,
+            TransactionType.Debit => -request.Amount,
             TransactionType.Credit => request.Amount,
             _ => 0
         };
 
         account = account with { Balance = resultMoney };
-        await _accountRepository.UpdateBalanceAccountAsync(account, cancellationToken);
+        await _accountRepository.UpdateBalanceAccountAsync(account, connection, transactionDb, cancellationToken);
         
         return _mapper.Map<CreateTransactionResponse>(result);
     }

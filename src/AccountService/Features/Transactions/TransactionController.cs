@@ -57,6 +57,7 @@ public class TransactionController : ControllerBase
     [ProducesResponseType(typeof(MbResult<TransferTransactionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(MbResult), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(MbResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [HttpPost]
     [Route("transfer")]
     public async Task<IActionResult> TransferTransaction([FromBody] TransferTransactionCommand command,

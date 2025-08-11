@@ -6,19 +6,11 @@ namespace AccountService.Features.Accounts.Commands.CreateAccount;
 /// Команда для создания счёта
 /// </summary>
 public record CreateAccountCommand : IRequest<CreateAccountResponse>
-{
-    public CreateAccountCommand(Guid ownerId, AccountType type, string currency, decimal balance, decimal? interestRate)
-    {
-        OwnerId = ownerId;
-        Type = type;
-        Currency = currency;
-        Balance = balance;
-        InterestRate = interestRate;
-    }
-
+{    
     /// <summary>
     /// Идентификатор клиента
     /// </summary>
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required Guid OwnerId { get; init; }
     /// <summary>
     /// Тип счёта
@@ -35,5 +27,5 @@ public record CreateAccountCommand : IRequest<CreateAccountResponse>
     /// <summary>
     /// Процентная ставка
     /// </summary>
-    public decimal? InterestRate { get; }
+    public decimal? InterestRate { get; init; }
 }
