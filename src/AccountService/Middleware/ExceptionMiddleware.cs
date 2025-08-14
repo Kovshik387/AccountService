@@ -50,6 +50,11 @@ public class ExceptionMiddleware
                 errorResponse = MbResult.Error("Validation error", validationErrors); 
                 break;
 
+            case ConflictException conflictEx:
+                statusCode = StatusCodes.Status409Conflict;
+                errorResponse = MbResult.Error("Conflict", GetErrorMessage(conflictEx.Message));
+                break;
+            
             case AccountNotFoundException notFoundEx:
                 statusCode = StatusCodes.Status404NotFound;
                 errorResponse = MbResult.Error("Not found", GetErrorMessage(notFoundEx.Message));

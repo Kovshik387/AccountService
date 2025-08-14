@@ -1,7 +1,9 @@
-﻿using AccountService.Domain.Entities;
+﻿using System.Data;
+using AccountService.Domain.Entities;
 using AccountService.Domain.Entities.Enums;
 using AccountService.Domain.Repositories;
 using AccountService.Features.Exceptions;
+using AccountService.Features.Interfaces;
 using FluentValidation;
 using MediatR;
 
@@ -13,12 +15,18 @@ public class
 {
     private readonly IAccountRepository _accountRepository;
     private readonly ITransactionRepository _transactionRepository;
+    private readonly IPgRepository _pgRepository;
 
+    private readonly ILogger<TransferTransactionCommandHandler> _logger;
+    
     public TransferTransactionCommandHandler(IAccountRepository accountRepository, 
-        ITransactionRepository transactionRepository)
+        ITransactionRepository transactionRepository, IPgRepository pgRepository,
+        ILogger<TransferTransactionCommandHandler> logger)
     {
         _accountRepository = accountRepository;
         _transactionRepository = transactionRepository;
+        _pgRepository = pgRepository;
+        _logger = logger;
     }
 
     public async Task<TransferTransactionResponse> Handle(TransferTransactionCommand request,
@@ -59,15 +67,38 @@ public class
             Description = request.Description,
             Date = dateTransfer
         };
-        
-        _ = await _transactionRepository.CreateTransactionAsync(ownerTransaction, cancellationToken);
-        _ = await _transactionRepository.CreateTransactionAsync(receiverTransaction, cancellationToken);
-        
-        owner = owner with { Balance = owner.Balance - request.Amount };
-        receiver = receiver with { Balance = receiver.Balance + request.Amount };
-        
-        _ = await _accountRepository.UpdateBalanceAccountAsync(owner, cancellationToken);
-        _ = await _accountRepository.UpdateBalanceAccountAsync(receiver, cancellationToken);
+
+        await using var connection = await _pgRepository.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.Serializable, 
+            cancellationToken);
+        try
+        {
+            _ = await _transactionRepository.CreateTransactionAsync(ownerTransaction, connection, transaction,
+                cancellationToken);
+            _ = await _transactionRepository.CreateTransactionAsync(receiverTransaction, connection, transaction,
+                cancellationToken);
+
+            owner = owner with { Balance = owner.Balance - request.Amount };
+            receiver = receiver with { Balance = receiver.Balance + request.Amount };
+
+            _ = await _accountRepository.UpdateBalanceAccountAsync(owner, connection, transaction, cancellationToken);
+            _ = await _accountRepository.UpdateBalanceAccountAsync(receiver, connection, transaction,
+                cancellationToken);
+
+            var total = owner.Balance + receiver.Balance;
+            var expected = (owner.Balance + request.Amount) + (receiver.Balance - request.Amount);
+
+            if (Math.Abs(total - expected) > 0.0001m)
+                throw new AccountException("Balance mismatch — rolling back.");
+            
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            await transaction.RollbackAsync(cancellationToken);
+            throw new ConflictException();
+        }
         
         return new TransferTransactionResponse(ownerTransaction.Id);
     }

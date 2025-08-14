@@ -6,10 +6,12 @@ namespace AccountService.Features.Accounts.Commands.UpdateAccount;
 /// </summary>
 public record UpdateAccountCommand : IRequest<UpdateAccountResponse>
 {
-    public UpdateAccountCommand(decimal interestRate, Guid id)
+    public UpdateAccountCommand() { }
+    public UpdateAccountCommand(decimal interestRate, Guid id, uint xMin)
     {
         InterestRate = interestRate;
         Id = id;
+        XMin = xMin;
     }
 
     /// <summary>
@@ -20,4 +22,8 @@ public record UpdateAccountCommand : IRequest<UpdateAccountResponse>
     /// Процентная ставка
     /// </summary>
     public decimal InterestRate { get; init; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public uint XMin { get; init; }
 }

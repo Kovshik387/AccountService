@@ -24,7 +24,7 @@ public class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Create
             Type = request.Type,
             OwnerId = request.OwnerId,
             Currency = request.Currency,
-            OpeningDate = DateTimeOffset.Now,
+            OpeningDate = DateTimeOffset.UtcNow,
             Id = Guid.NewGuid(),
             InterestRate = request.InterestRate
         };

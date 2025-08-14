@@ -5,6 +5,19 @@ networks:
         driver: bridge
 
 services:
+    postgres:
+        image: postgres:latest
+        container_name: postgres
+        environment:
+            POSTGRES_NAME: 'postgres'
+            POSTGRES_PASSWORD: 'SuperStrongPassword'
+        ports:
+            - "5433:5432"
+        networks:
+            - dev
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+    
     keycloak:
         image: quay.io/keycloak/keycloak:latest
         container_name: keycloak
@@ -36,3 +49,4 @@ services:
 
 volumes:
     config:
+    postgres-data:

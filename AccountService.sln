@@ -16,6 +16,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{FFB294
 		config\AccountRealm-realm.json = config\AccountRealm-realm.json
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4381CDDD-69D1-426C-B51D-7D529EFB1284}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountService.UnitTests", "tests\AccountService.UnitTests\AccountService.UnitTests.csproj", "{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountService.IntegrationTests", "tests\AccountService.IntegrationTests\AccountService.IntegrationTests.csproj", "{C1AE298D-4749-40B0-8275-DB35976B4F88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +32,19 @@ Global
 		{A9360249-CE8F-4446-A50D-B12C7BD17D37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9360249-CE8F-4446-A50D-B12C7BD17D37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9360249-CE8F-4446-A50D-B12C7BD17D37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1AE298D-4749-40B0-8275-DB35976B4F88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1AE298D-4749-40B0-8275-DB35976B4F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1AE298D-4749-40B0-8275-DB35976B4F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1AE298D-4749-40B0-8275-DB35976B4F88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A9360249-CE8F-4446-A50D-B12C7BD17D37} = {43F3E1C9-FF6E-41DD-892B-26464628D294}
 		{FFB29490-7147-4708-A50D-FD0EC4CA4BE8} = {70087F30-554F-433B-8CB7-CE6BB7D43046}
+		{3524F7C3-DC0E-446E-B46C-ACABD65E4C9A} = {4381CDDD-69D1-426C-B51D-7D529EFB1284}
+		{C1AE298D-4749-40B0-8275-DB35976B4F88} = {4381CDDD-69D1-426C-B51D-7D529EFB1284}
 	EndGlobalSection
 EndGlobal
