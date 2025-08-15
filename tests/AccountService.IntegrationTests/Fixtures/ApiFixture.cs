@@ -60,7 +60,7 @@ public class ApiFixture<TProgram>
         });
         var host = base.CreateHost(builder);
 
-        ClearDatabase(host);
+        // ClearDatabase(host);
         host.MigrateUp();
 
         return host;
@@ -78,10 +78,10 @@ public class ApiFixture<TProgram>
         await _pgContainer.DisposeAsync();
     }
 
-    private static void ClearDatabase(IHost host)
-    {
-        using var scope = host.Services.CreateScope();
-        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateDown(0);
-    }
+    // private static void ClearDatabase(IHost host)
+    // {
+    //     using var scope = host.Services.CreateScope();
+    //     var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    //     runner.MigrateDown(0);
+    // }
 }
