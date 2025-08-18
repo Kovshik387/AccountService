@@ -1,10 +1,11 @@
-﻿using MediatR;
+﻿using AccountService.Features.Interfaces;
+using MediatR;
 
 namespace AccountService.Features.Transactions.Commands.TransferTransaction;
 /// <summary>
 /// Команда для создания трансфера между счетами
 /// </summary>
-public record TransferTransactionCommand : IRequest<TransferTransactionResponse>
+public record TransferTransactionCommand : IRequest<TransferTransactionResponse>, ICorrelationMessage
 {
     public TransferTransactionCommand(Guid ownerAccountId, Guid receiverAccountId, decimal amount, string currency,
         string description)
@@ -36,4 +37,15 @@ public record TransferTransactionCommand : IRequest<TransferTransactionResponse>
     /// Описание
     /// </summary>
     public string Description { get; init; } = string.Empty;
+
+    public Guid MessageId { get; set; }
+
+    /// <summary>
+    /// Корреляция
+    /// </summary>
+    public string? CorrelationId { get; set; } 
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? CausationId { get; set; }  
 }

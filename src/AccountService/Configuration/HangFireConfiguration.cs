@@ -1,5 +1,6 @@
 ﻿using AccountService.Configuration.Settings;
 using AccountService.Features.AccrueInterest.Jobs;
+using AccountService.Features.Outbox.Jobs;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.MemoryStorage;
@@ -10,9 +11,12 @@ public static class HangFireConfiguration
 {
     public static IServiceCollection AddHangFire(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHangfireServer();
+        services.AddHangfireServer(x =>
+        {
+            x.Queues = ["default", "outbox","inbox"];
+        });
         services.AddHangfire(x => { x.UseMemoryStorage(); });
-        services.Configure<IdentityOptions>(configuration.GetSection(nameof(HangFireOptions)));
+        services.Configure<HangFireOptions>(configuration.GetSection(nameof(HangFireOptions)));
         
         return services;
     }
@@ -27,9 +31,20 @@ public static class HangFireConfiguration
             ]
         });
         RecurringJob.AddOrUpdate<AccrueInterestJob>(
-            "daily-accrue-interest-job",
+            "minutely-accrue-interest-job",
             job => job.InvokeAsync(),
             Cron.Daily
+            );
+        
+        RecurringJob.AddOrUpdate<OutboxPublisherJob>(
+            "minutely-outbox-publisher-job",
+            job => job.RunAsync(JobCancellationToken.Null, 10, 60),
+            Cron.Minutely
+            );
+        RecurringJob.AddOrUpdate<OutboxReceiverJob>(
+            "inbox-publisher-job",
+            job => job.RunAsync(JobCancellationToken.Null),
+            Cron.Minutely
             );
     }
     

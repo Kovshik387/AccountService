@@ -14,6 +14,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{FFB29490-7147-4708-A50D-FD0EC4CA4BE8}"
 	ProjectSection(SolutionItems) = preProject
 		config\AccountRealm-realm.json = config\AccountRealm-realm.json
+		config\rabbitMq\definitions.json = config\rabbitMq\definitions.json
+		config\rabbitMq\rabbitmq.conf = config\rabbitMq\rabbitmq.conf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4381CDDD-69D1-426C-B51D-7D529EFB1284}"

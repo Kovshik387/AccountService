@@ -34,6 +34,19 @@ services:
         volumes:
             - ./config:/opt/keycloak/data/import
 
+    rabbitMq:
+        container_name: rabbitMq
+        image: rabbitmq:management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        networks:
+            - dev
+        volumes:
+            - ./config/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+            - ./config/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+            - rabbitmq-data:/var/lib/rabbitmq
+
     account-service:
         image: ${DOCKER_REGISTRY-}account-service
         container_name: account-service 
@@ -50,3 +63,4 @@ services:
 volumes:
     config:
     postgres-data:
+    rabbitmq-data:
