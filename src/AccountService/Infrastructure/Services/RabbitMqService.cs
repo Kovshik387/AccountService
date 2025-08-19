@@ -29,6 +29,7 @@ public sealed class RabbitMqService : IMessageBus, IAsyncDisposable, IDisposable
             VirtualHost = settings.VHost,
             AutomaticRecoveryEnabled = true,
             NetworkRecoveryInterval = TimeSpan.FromSeconds(5),
+            // ConsumerDispatchConcurrency = 1
         };
         _logger = logger;
     }

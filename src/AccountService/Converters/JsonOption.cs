@@ -11,7 +11,8 @@ public static class JsonOption
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         Converters =
         {
-            new DateTimeOffsetConverter()
+            new DateTimeOffsetConverter(),
+            new JsonStringEnumConverter()
         }
     };
 }

@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using AccountService.Domain.Events;
 using AccountService.Domain.Models;
-using AccountService.Infrastructure.Migrations;
 using Npgsql;
 
 namespace AccountService.Domain.Repositories;

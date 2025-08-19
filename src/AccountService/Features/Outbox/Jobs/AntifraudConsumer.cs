@@ -5,10 +5,11 @@ using AccountService.Domain.Events.Consume;
 using AccountService.Domain.Repositories;
 using AccountService.Features.Interfaces;
 using Hangfire;
+using Microsoft.Extensions.Options;
 
 namespace AccountService.Features.Outbox.Jobs;
 
-public class OutboxReceiverJob
+public class AntifraudConsumer
 {
     private readonly IInBoxRepository _repository;
     private readonly IAccountRepository _accountRepository;
@@ -17,20 +18,20 @@ public class OutboxReceiverJob
 
     private readonly IMessageBus _messageBus;
 
-    private readonly ILogger<OutboxReceiverJob> _logger;
+    private readonly ILogger<AntifraudConsumer> _logger;
 
     private readonly RouteOptions _routeOptions;
 
     private const string SupportedVersion = "v1";
 
-    public OutboxReceiverJob(IInBoxRepository repository, ILogger<OutboxReceiverJob> logger, IMessageBus messageBus,
-        RouteOptions routeOptions, IAccountRepository accountRepository, IPgRepository pgRepository,
+    public AntifraudConsumer(IInBoxRepository repository, ILogger<AntifraudConsumer> logger, IMessageBus messageBus,
+        IOptions<RouteOptions> routeOptions, IAccountRepository accountRepository, IPgRepository pgRepository,
         IInBoxDeadLettersRepository deadLettersRepository)
     {
         _repository = repository;
         _logger = logger;
         _messageBus = messageBus;
-        _routeOptions = routeOptions;
+        _routeOptions = routeOptions.Value;
         _accountRepository = accountRepository;
         _pgRepository = pgRepository;
         _deadLettersRepository = deadLettersRepository;
@@ -40,7 +41,7 @@ public class OutboxReceiverJob
     [AutomaticRetry(Attempts = 0)]
     public async Task RunAsync(IJobCancellationToken token)
     {
-        var shutdownToken = token.ShutdownToken;
+        var shutdownToken = CancellationToken.None;
 
         await _messageBus.Subscribe<EventShell<ClientBlocked>>(_routeOptions.ClientBlockEventRoute,
             async handle =>

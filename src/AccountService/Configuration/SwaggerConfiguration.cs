@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using AccountService.Configuration.Filter;
 using Microsoft.OpenApi.Models;
+using SecuritySchemeType = Microsoft.OpenApi.Models.SecuritySchemeType;
 
 namespace AccountService.Configuration;
 
@@ -12,6 +14,7 @@ public static class SwaggerConfiguration
             x.SwaggerDoc("v1", new OpenApiInfo { Title = "Account API", Version = "v1" });
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            x.OperationFilter<EventsFilter>();
             x.IncludeXmlComments(xmlPath);
             
             x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

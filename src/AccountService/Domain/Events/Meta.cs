@@ -1,4 +1,5 @@
-﻿namespace AccountService.Domain.Events;
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Global получение свойств
+namespace AccountService.Domain.Events;
 
 public record Meta
 {

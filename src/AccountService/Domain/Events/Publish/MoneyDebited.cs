@@ -1,4 +1,5 @@
-﻿namespace AccountService.Domain.Events.Publish;
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Global Получение свойств
+namespace AccountService.Domain.Events.Publish;
 
 public record MoneyDebited
 {

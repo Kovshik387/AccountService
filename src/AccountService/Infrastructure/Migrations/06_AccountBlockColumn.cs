@@ -7,10 +7,10 @@ namespace AccountService.Infrastructure.Migrations;
 public class AccountBlock : SqlMigration
 {
     protected override string GetUpSql(IServiceProvider services) => @"
-    alter table accounts add column blocked boolean not null default false;
+    alter table accounts add column frozen boolean not null default false;
 ";
 
     protected override string GetDownSql(IServiceProvider services) => @"
-    alter table accounts drop column if exists blocked;
+    alter table accounts drop column if exists frozen;
 ";
 }

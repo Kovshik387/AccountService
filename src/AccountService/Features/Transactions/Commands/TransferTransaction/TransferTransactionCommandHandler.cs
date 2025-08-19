@@ -60,6 +60,11 @@ public class
 
             var dateTransfer = DateTimeOffset.UtcNow;
 
+            if (owner.Frozen || receiver.Frozen)
+            {
+                throw new ConflictException("Blocked");
+            }
+            
             var ownerTransaction = new Transaction
             {
                 Id = Guid.NewGuid(),

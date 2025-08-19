@@ -1,7 +1,4 @@
 ﻿namespace AccountService.IntegrationTests.Fixtures;
 
-[CollectionDefinition(nameof(ApiFixture<Program>))]
-public class FixtureDefinition : ICollectionFixture<ApiFixture<Program>>
-{
-    
-}
+[CollectionDefinition(nameof(FixtureDefinition), DisableParallelization = true)]
+public sealed class FixtureDefinition : ICollectionFixture<ApiFixture<Program>> { }

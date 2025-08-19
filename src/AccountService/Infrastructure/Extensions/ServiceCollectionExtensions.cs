@@ -46,6 +46,8 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<RabbitMqOptions>(configuration.GetSection(nameof(RabbitMqOptions)));
         
+        services.Configure<Features.RouteOptions>(configuration.GetSection(nameof(Features.RouteOptions)));
+        
         services.AddSingleton<IMessageBus, RabbitMqService>();
         
         return services;

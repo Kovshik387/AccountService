@@ -44,7 +44,7 @@ public sealed class OutboxPublisherJob
     public async Task RunAsync(IJobCancellationToken token, int batchSize = 200, int leaseSeconds = 60)
     {
         _logger.LogInformation("Starting outbox publisher");
-        var shutdownToken = token.ShutdownToken;
+        var shutdownToken = CancellationToken.None;
 
         var batch = await _outboxRepository.GetEventsBatchAsync(batchSize, shutdownToken);
         if (batch.Count == 0)

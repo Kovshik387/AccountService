@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 using AccountService.Infrastructure.Extensions;
 using AccountService.IntegrationTests.Fakers;
+using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.RabbitMq;
@@ -18,7 +19,7 @@ public class ApiFixture<TProgram>
 
     public readonly PostgreSqlContainer PgContainer;
     public readonly RabbitMqContainer RabbitMqContainer;
-    
+
     public ApiFixture()
     {
         PgContainer = new PostgreSqlBuilder()
@@ -32,8 +33,8 @@ public class ApiFixture<TProgram>
             .WithImage("rabbitmq:management")
             .WithUsername("user")
             .WithPassword("user")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5672)) 
             .Build();
-            
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
@@ -61,14 +62,15 @@ public class ApiFixture<TProgram>
 
         builder.ConfigureAppConfiguration((_, config) =>
         {
+            var rmqPort = RabbitMqContainer.GetMappedPublicPort(5672);
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["DbOptions:ConnectionString"] = ConnectionString,
                 ["RabbitMqOptions:Host"]       = "localhost",
-                ["RabbitMqOptions:Port"]       = "5672",
+                ["RabbitMqOptions:Port"]       = rmqPort.ToString(),
                 ["RabbitMqOptions:UserName"]   = "user",
                 ["RabbitMqOptions:Password"]   = "user",
-                ["RabbitMqOptions:VirtualHost"]= "/"
+                ["RabbitMqOptions:VHost"]= "/"
             });
         });
         var host = base.CreateHost(builder);
@@ -83,6 +85,7 @@ public class ApiFixture<TProgram>
     {
         await PgContainer.StartAsync();
         await RabbitMqContainer.StartAsync();
+        await Task.Delay(5000);
         Client = CreateClient();
     }
 

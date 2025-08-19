@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddJobs(this IServiceCollection services)
     {
         services.AddScoped<AccrueInterestJob>();
+        services.AddScoped<AntifraudConsumer>();
         services.AddScoped<OutboxPublisherJob>();
         
         return services;

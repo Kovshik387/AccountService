@@ -12,6 +12,6 @@ public record Account
     public decimal? InterestRate { get; init; }
     public required DateTimeOffset OpeningDate { get; init; }
     public DateTimeOffset? ClosingDate { get; init; }
-    public bool Blocked { get; init; } 
+    public bool Frozen { get; init; } 
     public IReadOnlyCollection<Transaction> Transactions { get; init; } = [];
 }

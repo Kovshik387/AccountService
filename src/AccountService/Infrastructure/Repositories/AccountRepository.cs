@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Data.Common;
 using AccountService.Domain.Entities;
 using AccountService.Domain.Models;
 using AccountService.Domain.Repositories;
@@ -68,15 +67,9 @@ public class AccountRepository : PgRepository, IAccountRepository
         return success > 0 ? updateAccount.Id : null;
     }
 
-    public Task<decimal> UpdateBalanceAccountAsync(Account account, NpgsqlConnection dbConnection,
+    public async Task<decimal> UpdateBalanceAccountAsync(Account account, NpgsqlConnection dbConnection,
         IDbTransaction dbTransaction,
         CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<decimal> UpdateBalanceAccountAsync(Account account, NpgsqlConnection? dbConnection,
-        DbTransaction dbTransaction, CancellationToken cancellationToken)
     {
         const string sql = @"
             update accounts
@@ -95,14 +88,7 @@ public class AccountRepository : PgRepository, IAccountRepository
             cancellationToken: cancellationToken
         );
 
-        if (dbConnection is not null)
-        {
-            return await dbConnection.ExecuteScalarAsync<decimal>(cmd);
-        }
-
-        await using var connection = await OpenConnectionAsync(cancellationToken);
-
-        return await connection.ExecuteScalarAsync<decimal>(cmd);
+        return await dbConnection.ExecuteScalarAsync<decimal>(cmd);
     }
 
     public async Task<Guid?> DeleteAccountAsync(Guid accountId, CancellationToken cancellationToken)
@@ -210,7 +196,7 @@ public class AccountRepository : PgRepository, IAccountRepository
         IDbTransaction dbTransaction, CancellationToken cancellationToken)
     {
         const string sql = @"
-update accounts set blocked = true where id = @Id";
+update accounts set frozen = true where id = @Id";
 
         var cmd = new CommandDefinition(
             sql,

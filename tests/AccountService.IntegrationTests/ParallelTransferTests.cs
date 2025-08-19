@@ -1,21 +1,18 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using AccountService.Domain.Entities.Enums;
 using AccountService.Features;
-using AccountService.Features.Accounts.Commands.CreateAccount;
 using AccountService.Features.Accounts.Queries.GetAccountById;
-using AccountService.IntegrationTests.Fakers;
+using AccountService.IntegrationTests.Creators;
 using AccountService.IntegrationTests.Fixtures;
 using FluentAssertions;
 
 namespace AccountService.IntegrationTests;
 
-[CollectionDefinition(nameof(FixtureDefinition))]
-public class ParallelTransferTests : IClassFixture<ApiFixture<Program>>
+[Collection(nameof(FixtureDefinition))]
+public class ParallelTransferTests
 {
     private readonly HttpClient _client;
-
-    private const string AccountPath = "/api/accounts/";
+    
     private const string TransactionPath = "/api/transactions/transfer";
 
     public ParallelTransferTests(ApiFixture<Program> fixture)
@@ -30,8 +27,8 @@ public class ParallelTransferTests : IClassFixture<ApiFixture<Program>>
         // Arrange
         const decimal balance = 1000;
         const string currency = "RUB";
-        var firstAccount = await CreateAccountAsync(balance, currency);
-        var secondAccount = await CreateAccountAsync(balance, currency);
+        var firstAccount = await CreateAccount.CreateAccountAsync(_client, balance, currency);
+        var secondAccount = await CreateAccount.CreateAccountAsync(_client, balance, currency);
 
         const decimal sum = balance * 2;
         var body = new
@@ -51,33 +48,20 @@ public class ParallelTransferTests : IClassFixture<ApiFixture<Program>>
 
         var unexpected = responses.Where(x => !x.IsSuccessStatusCode
                                               && x.StatusCode != HttpStatusCode.Conflict).ToList();
-        
+
         // Assert
         var totalAfter = await GetTotalAsync((Guid)firstAccount!, (Guid)secondAccount!);
         unexpected.Should().BeEmpty();
         totalAfter.Should().Be(sum);
     }
 
-    private async Task<Guid?> CreateAccountAsync(decimal balance, string currency)
-    {
-        var response = await _client.PostAsJsonAsync(AccountPath,
-            AccountCreateFaker.Generate().First()
-                .WithBalance(balance)
-                .WithType(AccountType.Checking)
-                .WithInterestRate(null)
-                .WithCurrency(currency)
-        );
-        
-        response.EnsureSuccessStatusCode();
-
-        var dto = await response.Content.ReadFromJsonAsync<MbResult<CreateAccountResponse>>();
-        return dto!.Result!.Id;
-    }
 
     private async Task<decimal> GetTotalAsync(Guid first, Guid second)
     {
-        var firstResponse = await _client.GetFromJsonAsync<MbResult<GetAccountByIdQueryResponse>>(AccountPath + first);
-        var secondResponse = await _client.GetFromJsonAsync<MbResult<GetAccountByIdQueryResponse>>(AccountPath + second);
+        var firstResponse =
+            await _client.GetFromJsonAsync<MbResult<GetAccountByIdQueryResponse>>(CreateAccount.AccountPath + first);
+        var secondResponse =
+            await _client.GetFromJsonAsync<MbResult<GetAccountByIdQueryResponse>>(CreateAccount.AccountPath + second);
         return firstResponse!.Result!.Balance + secondResponse!.Result!.Balance;
     }
 }

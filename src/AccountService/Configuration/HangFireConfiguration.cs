@@ -41,7 +41,7 @@ public static class HangFireConfiguration
             job => job.RunAsync(JobCancellationToken.Null, 10, 60),
             Cron.Minutely
             );
-        RecurringJob.AddOrUpdate<OutboxReceiverJob>(
+        RecurringJob.AddOrUpdate<AntifraudConsumer>(
             "inbox-publisher-job",
             job => job.RunAsync(JobCancellationToken.Null),
             Cron.Minutely
