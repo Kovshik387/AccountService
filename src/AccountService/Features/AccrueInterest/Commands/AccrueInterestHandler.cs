@@ -46,6 +46,7 @@ public class AccrueInterestHandler : IRequestHandler<AccrueInterestCommand>
                     },
                     transaction
                 );
+
                 await transaction.CommitAsync(cancellationToken);
                 _logger.LogInformation($"Accrue interest executed. {items.Length}");
             }

@@ -24,6 +24,7 @@ public class TransactionController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(MbResult<CreateTransactionResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionCommand command,
         CancellationToken cancellationToken)
     {
@@ -40,6 +41,7 @@ public class TransactionController : ControllerBase
     [ProducesResponseType(typeof(MbResult<GetTransactionByIdQueryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(MbResult), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(MbResult), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [HttpGet]
     [Route("{id:guid}")]
     public async Task<IActionResult> GetTransactionById(Guid id, CancellationToken cancellationToken)

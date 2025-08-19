@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 using AccountService.Domain.Entities;
 using AccountService.Domain.Models;
 using AccountService.Domain.Repositories;
@@ -12,16 +12,19 @@ namespace AccountService.Infrastructure.Repositories;
 
 public class AccountRepository : PgRepository, IAccountRepository
 {
-    public AccountRepository(IOptions<DbOptions> options) : base(options) { }
+    public AccountRepository(IOptions<DbOptions> options) : base(options)
+    {
+    }
 
-    public async Task<Guid?> AddAccountAsync(Account account, CancellationToken cancellationToken)
+    public async Task<Guid?> AddAccountAsync(Account account, NpgsqlConnection dbConnection,
+        IDbTransaction dbTransaction,
+        CancellationToken cancellationToken)
     {
         const string sql = @"
        insert into accounts (id, owner_id, type, currency, balance, interest_rate, opening_date)
        values (@Id, @OwnerId, @Type, @Currency, @Balance, @InterestRate, @OpeningDate)
 ";
 
-        await using var connection = await OpenConnectionAsync(cancellationToken);
         var cmd = new CommandDefinition(
             sql,
             new
@@ -36,8 +39,8 @@ public class AccountRepository : PgRepository, IAccountRepository
             },
             cancellationToken: cancellationToken
         );
-        
-        var success = await connection.ExecuteAsync(cmd);
+
+        var success = await dbConnection.ExecuteAsync(cmd);
         return success > 0 ? account.Id : null;
     }
 
@@ -64,16 +67,17 @@ public class AccountRepository : PgRepository, IAccountRepository
         return success > 0 ? updateAccount.Id : null;
     }
 
-    public async Task<Guid> UpdateBalanceAccountAsync(Account account, NpgsqlConnection dbConnection, 
-        DbTransaction dbTransaction, CancellationToken cancellationToken)
+    public async Task<decimal> UpdateBalanceAccountAsync(Account account, NpgsqlConnection dbConnection,
+        IDbTransaction dbTransaction,
+        CancellationToken cancellationToken)
     {
         const string sql = @"
             update accounts
             set balance = @Balance
-            where id = @Id
+            where id = @
+            returning balance
         ";
 
-        await using var connection = await OpenConnectionAsync(cancellationToken);
         var cmd = new CommandDefinition(
             sql,
             new
@@ -84,8 +88,7 @@ public class AccountRepository : PgRepository, IAccountRepository
             cancellationToken: cancellationToken
         );
 
-        await connection.ExecuteAsync(cmd);
-        return account.Id;
+        return await dbConnection.ExecuteScalarAsync<decimal>(cmd);
     }
 
     public async Task<Guid?> DeleteAccountAsync(Guid accountId, CancellationToken cancellationToken)
@@ -108,7 +111,8 @@ public class AccountRepository : PgRepository, IAccountRepository
         return success > 0 ? accountId : null;
     }
 
-    public async Task<IReadOnlyCollection<Account>> GetAccountsByIdOwnerAsync(Guid ownerId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<Account>> GetAccountsByIdOwnerAsync(Guid ownerId,
+        CancellationToken cancellationToken)
     {
         const string sql = @"
             select * from accounts where owner_id = @OwnerId
@@ -141,7 +145,7 @@ public class AccountRepository : PgRepository, IAccountRepository
             new
             {
                 Id = accountId
-            }, 
+            },
             cancellationToken: cancellationToken
         );
 
@@ -164,7 +168,7 @@ public class AccountRepository : PgRepository, IAccountRepository
             {
                 Id = accountId,
                 OwnerId = ownerId
-            }, 
+            },
             cancellationToken: cancellationToken
         );
 
@@ -186,5 +190,43 @@ public class AccountRepository : PgRepository, IAccountRepository
 
         var result = await connection.QueryAsync<Guid>(cmd);
         return result.ToList().AsReadOnly();
+    }
+
+    public async Task<Guid?> BlockAccountAsync(Guid accountId, NpgsqlConnection dbConnection,
+        IDbTransaction dbTransaction, CancellationToken cancellationToken)
+    {
+        const string sql = @"
+update accounts set frozen = true where id = @Id";
+
+        var cmd = new CommandDefinition(
+            sql,
+            new
+            {
+                Id = accountId,
+            },
+            transaction: dbTransaction,
+            cancellationToken: cancellationToken);
+
+        var success = await dbConnection.ExecuteAsync(cmd);
+        return success > 0 ? accountId : null;
+    }
+
+    public async Task<Guid?> UnblockAccountAsync(Guid accountId, NpgsqlConnection dbConnection,
+        IDbTransaction dbTransaction, CancellationToken cancellationToken)
+    {
+        const string sql = @"
+update accounts set blocked = false where id = @Id";
+
+        var cmd = new CommandDefinition(
+            sql,
+            new
+            {
+                Id = accountId,
+            },
+            transaction: dbTransaction,
+            cancellationToken: cancellationToken);
+
+        var success = await dbConnection.ExecuteAsync(cmd);
+        return success > 0 ? accountId : null;
     }
 }

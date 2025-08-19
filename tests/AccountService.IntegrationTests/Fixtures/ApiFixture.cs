@@ -4,9 +4,10 @@ using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 using AccountService.Infrastructure.Extensions;
 using AccountService.IntegrationTests.Fakers;
-using FluentMigrator.Runner;
+using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.RabbitMq;
 
 namespace AccountService.IntegrationTests.Fixtures;
 
@@ -14,17 +15,25 @@ public class ApiFixture<TProgram>
     : WebApplicationFactory<TProgram>, IAsyncLifetime where TProgram : class
 {
     public HttpClient Client { get; private set; } = null!;
-    private string ConnectionString => _pgContainer.GetConnectionString();
+    private string ConnectionString => PgContainer.GetConnectionString();
 
-    private readonly PostgreSqlContainer _pgContainer;
+    public readonly PostgreSqlContainer PgContainer;
+    public readonly RabbitMqContainer RabbitMqContainer;
 
     public ApiFixture()
     {
-        _pgContainer = new PostgreSqlBuilder()
+        PgContainer = new PostgreSqlBuilder()
             .WithDatabase("integrations_db")
             .WithUsername("postgres")
             .WithPassword("test_postgres")
             .WithImage("postgres:latest")
+            .Build();
+        
+        RabbitMqContainer = new RabbitMqBuilder()
+            .WithImage("rabbitmq:management")
+            .WithUsername("user")
+            .WithPassword("user")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5672)) 
             .Build();
     }
 
@@ -53,9 +62,15 @@ public class ApiFixture<TProgram>
 
         builder.ConfigureAppConfiguration((_, config) =>
         {
+            var rmqPort = RabbitMqContainer.GetMappedPublicPort(5672);
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["DbOptions:ConnectionString"] = ConnectionString
+                ["DbOptions:ConnectionString"] = ConnectionString,
+                ["RabbitMqOptions:Host"]       = "localhost",
+                ["RabbitMqOptions:Port"]       = rmqPort.ToString(),
+                ["RabbitMqOptions:UserName"]   = "user",
+                ["RabbitMqOptions:Password"]   = "user",
+                ["RabbitMqOptions:VHost"]= "/"
             });
         });
         var host = base.CreateHost(builder);
@@ -68,14 +83,17 @@ public class ApiFixture<TProgram>
 
     public async Task InitializeAsync()
     {
-        await _pgContainer.StartAsync();
+        await PgContainer.StartAsync();
+        await RabbitMqContainer.StartAsync();
+        await Task.Delay(5000);
         Client = CreateClient();
     }
 
     public new async Task DisposeAsync()
     {
         Client.Dispose();
-        await _pgContainer.DisposeAsync();
+        await RabbitMqContainer.DisposeAsync();
+        await PgContainer.DisposeAsync();
     }
 
     // private static void ClearDatabase(IHost host)

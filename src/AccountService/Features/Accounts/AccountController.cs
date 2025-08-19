@@ -29,6 +29,7 @@ public class AccountController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [ProducesResponseType(typeof(MbResult<CreateAccountResponse>),StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateAccount([FromBody] CreateAccountCommand command,
@@ -63,6 +64,7 @@ public class AccountController : ControllerBase
     /// <returns></returns>
     [HttpGet]
     [ProducesResponseType(typeof(MbResult<GetAccountDetailsByIdQueryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
     [Route("{id:guid}/transactions")]
     public async Task<IActionResult> GetAccountTransactions(Guid id, [FromQuery] DateTimeOffset from,
@@ -101,8 +103,9 @@ public class AccountController : ControllerBase
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns></returns>
     [HttpGet]
-    [ProducesResponseType(typeof(MbResult<ICollection<GetAccountListByOwnerIdQueryResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MbResult<IReadOnlyCollection<GetAccountListByOwnerIdQueryResponse>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(MbResult), StatusCodes.Status500InternalServerError)]
     [Route("owner/{ownerId:guid}")]
     public async Task<IActionResult> GetAccountsByOwnerId(Guid ownerId, CancellationToken cancellationToken)
@@ -121,6 +124,7 @@ public class AccountController : ControllerBase
     [HttpPatch]
     [ProducesResponseType(typeof(MbResult<UpdateAccountResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [Route("{id:guid}")]
     public async Task<IActionResult> UpdateAccount(Guid id, [FromBody] UpdateAccountCommand command,
         CancellationToken cancellationToken)
@@ -138,6 +142,7 @@ public class AccountController : ControllerBase
     [HttpDelete]
     [Route("{id:guid}")]
     [ProducesResponseType(typeof(MbResult<DeleteAccountResponse>),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MbResult), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(MbResult),StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAccount(Guid id, [FromBody] DeleteAccountCommand command,

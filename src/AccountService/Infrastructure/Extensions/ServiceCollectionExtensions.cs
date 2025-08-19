@@ -25,7 +25,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPgRepository, PgRepository>();
         services.AddSingleton<IAccountRepository, AccountRepository>();
         services.AddSingleton<ITransactionRepository, TransactionRepository>();
-
+        services.AddSingleton<IOutboxRepository, OutboxRepository>();
+        services.AddSingleton<IInBoxRepository, InBoxRepository>();
+        services.AddSingleton<IInBoxDeadLettersRepository, InBoxDeadLettersRepository>();
+        
         services.AddFluentMigrator(typeof(SqlMigration).Assembly);
 
         return services;
@@ -36,6 +39,17 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IClientVerificationService, ClientVerificationService>();
         services.AddSingleton<ICurrencyVerificationService, CurrencyVerificationService>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddMessageBus(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<RabbitMqOptions>(configuration.GetSection(nameof(RabbitMqOptions)));
+        
+        services.Configure<Features.RouteOptions>(configuration.GetSection(nameof(Features.RouteOptions)));
+        
+        services.AddSingleton<IMessageBus, RabbitMqService>();
+        
         return services;
     }
 

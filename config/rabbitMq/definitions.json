@@ -1,0 +1,106 @@
+{
+  "vhosts": [
+    {
+      "name": "/"
+    },
+    {
+      "name": "default"
+    }
+  ],
+  "users": [
+    {
+      "name": "guest",
+      "password": "guest",
+      "tags": "administrator"
+    },
+    {
+      "name": "user",
+      "password": "user",
+      "tags": "administrator"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "user",
+      "vhost": "default",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "account.events",
+      "vhost": "default",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "account.crm",
+      "vhost": "default",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "account.notifications",
+      "vhost": "default",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "account.antifraud",
+      "vhost": "default",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "account.audit",
+      "vhost": "default",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "account.events",
+      "vhost": "default",
+      "destination": "account.crm",
+      "destination_type": "queue",
+      "routing_key": "account.*",
+      "arguments": {}
+    },
+    {
+      "source": "account.events",
+      "vhost": "default",
+      "destination": "account.notifications",
+      "destination_type": "queue",
+      "routing_key": "money.*",
+      "arguments": {}
+    },
+    {
+      "source": "account.events",
+      "vhost": "default",
+      "destination": "account.antifraud",
+      "destination_type": "queue",
+      "routing_key": "client.*",
+      "arguments": {}
+    },
+    {
+      "source": "account.events",
+      "vhost": "default",
+      "destination": "account.audit",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    }
+  ]
+}
