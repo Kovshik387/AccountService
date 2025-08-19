@@ -10,28 +10,30 @@ public static class CorsConfiguration
     {
         var settingsSection = configuration.GetSection(nameof(CorsOptions));
         services.Configure<CorsOptions>(settingsSection);
-        var settings = settingsSection.Get<CorsOptions>();
-
-        if (settings == null)
-            throw new NullReferenceException("Cors settings not found");
+        var settings = settingsSection.Get<CorsOptions>()
+                       ?? throw new NullReferenceException("Cors settings not found");
 
         services.AddCors(options =>
         {
             options.AddPolicy(settings.NamePolicy, policy =>
             {
-                var origins = settings.AllowedOrigins.Split(',', ';')
-                    .Select(x => x.Trim())
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .ToArray();
+                var origins = settings.AllowedOrigins
+                    .Split(',', ';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                var hasAnyWildcard = origins.Length == 0 || origins.Any(o => o == "*" || o.Contains('*'));
 
                 policy.AllowAnyHeader();
                 policy.AllowAnyMethod();
-                policy.AllowCredentials();
 
-                if (origins.Length > 0 && !origins.Contains("*"))
-                    policy.WithOrigins(origins);
+                if (!hasAnyWildcard)
+                {
+                    policy.WithOrigins(origins)
+                        .AllowCredentials();
+                }
                 else
-                    policy.SetIsOriginAllowed(_ => true);
+                {
+                    policy.AllowAnyOrigin();
+                }
 
                 policy.WithExposedHeaders("Content-Disposition");
             });
@@ -42,9 +44,7 @@ public static class CorsConfiguration
 
     public static void UseCorsConfiguration(this IApplicationBuilder app)
     {
-        var settings = app.ApplicationServices
-            .GetRequiredService<IOptions<CorsOptions>>().Value;
-
+        var settings = app.ApplicationServices.GetRequiredService<IOptions<CorsOptions>>().Value;
         app.UseCors(settings.NamePolicy);
     }
 }
